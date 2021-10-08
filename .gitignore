@@ -1,6 +1,7 @@
 models
 wandb
 oof_df.csv
+validation_df.csv
 train.log
 *.pth
 *.pkl
