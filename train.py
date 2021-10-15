@@ -16,6 +16,7 @@ def main(c):
     log.info("Started.")
 
     utils.seed_torch(c.params.seed)
+    utils.debug_settings(c)
 
     os.environ["CUDA_VISIBLE_DEVICES"] = c.settings.gpus
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

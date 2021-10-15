@@ -18,6 +18,13 @@ def seed_torch(seed=42):
     torch.backends.cudnn.deterministic = True
 
 
+def debug_settings(c):
+    if c.settings.debug:
+        c.settings.print_freq = 10
+        c.params.n_fold = 3
+        c.params.epoch = 1
+
+
 def log_params_from_omegaconf_dict(parent_name, element):
     if isinstance(element, DictConfig):
         for k, v in element.items():
