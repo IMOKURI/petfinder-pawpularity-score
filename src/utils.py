@@ -21,12 +21,14 @@ def seed_torch(seed=42):
 def log_params_from_omegaconf_dict(parent_name, element):
     if isinstance(element, DictConfig):
         for k, v in element.items():
+            key = f"{k}" if parent_name == "" else f"{parent_name}.{k}"
             if isinstance(v, DictConfig) or isinstance(v, ListConfig):
-                log_params_from_omegaconf_dict(f"{parent_name}.{k}", v)
+                log_params_from_omegaconf_dict(key, v)
             else:
-                mlflow.log_param(f"{parent_name}.{k}", v)
+                mlflow.log_param(key, v)
     elif isinstance(element, ListConfig):
         for i, v in enumerate(element):
+            key = f"{i}" if parent_name == "" else f"{parent_name}.{i}"
             mlflow.log_param(f"{parent_name}.{i}", v)
 
 

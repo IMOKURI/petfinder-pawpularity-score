@@ -28,7 +28,7 @@ def main(c):
 
     with mlflow.start_run():
         utils.log_commit_hash()
-        utils.log_params_from_omegaconf_dict("params", c.params)
+        utils.log_params_from_omegaconf_dict("", c.params)
 
         mlflow.pytorch.log_model(model, c.params.model_name)
         log.info("Done.")
