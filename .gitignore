@@ -1,4 +1,5 @@
 models
+outputs
 wandb
 oof_df.csv
 validation_df.csv

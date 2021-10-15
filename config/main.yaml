@@ -1,0 +1,14 @@
+mlflow:
+  tracking_uri: http://127.0.0.1:5000
+  experiment: sugi-demo-2
+
+setting:
+  n_class: 1
+
+params:
+  n_fold: 10
+  epoch: 10
+  batch_size: 64
+  features:
+    - mixup
+    - cutmix
