@@ -10,14 +10,40 @@ mlflow:
 
 settings:
   gpus: "1,2,3,4,5,6,7"
-  output_dir: ./
+
+  dirs:
+    input: ${hydra:runtime.cwd}/../input/petfinder-pawpularity-score/
+    train_image: ${settings.dirs.input}train/
+    test_image: ${settings.dirs.input}test/
+
+  job_type:
+    # - preprocess
+    - train
+    # - train2
+    # - train3
+    # - validate
+    # - inference
+
+  debug: True
+  n_debug_data: 1000
+
+  amp: True
+  multi_gpu: True
+
   n_class: 1
 
 params:
   seed: 440
   n_fold: 10
   epoch: 10
+  es_patience: 0
   batch_size: 64
-  features:
-    - mixup
-    - cutmix
+  gradient_acc_step: 1
+  max_grad_norm: 1000
+  criterion: BCEWithLogitsLoss
+  optimizer: Adam
+  scheduler: CosineAnnealingWarmRestarts
+  lr: 1e-5
+  min_lr: 1e-6
+  weight_decay: 1e-7
+  model_name: resnet18 # swin_large_patch4_window12_384_in22k
