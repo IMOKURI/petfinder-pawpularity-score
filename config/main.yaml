@@ -1,8 +1,15 @@
+hydra:
+  job_logging:
+    formatters:
+      simple:
+        format: '[%(levelname)s] - %(message)s'
+
 mlflow:
   tracking_uri: http://127.0.0.1:5000
   experiment: sugi-demo-2
 
-setting:
+settings:
+  output_dir: ./
   n_class: 1
 
 params:
