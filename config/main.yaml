@@ -1,3 +1,8 @@
+defaults:
+  - model@params: base
+  - loss@params: base
+  - _self_
+
 hydra:
   job_logging:
     formatters:
@@ -40,10 +45,3 @@ params:
   batch_size: 64
   gradient_acc_step: 1
   max_grad_norm: 1000
-  criterion: BCEWithLogitsLoss
-  optimizer: Adam
-  scheduler: CosineAnnealingWarmRestarts
-  lr: 1e-5
-  min_lr: 1e-6
-  weight_decay: 1e-7
-  model_name: resnet18 # swin_large_patch4_window12_384_in22k

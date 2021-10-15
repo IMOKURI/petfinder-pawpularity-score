@@ -4,7 +4,7 @@
 NOW = $(shell date '+%Y%m%d-%H%M%S')
 
 train: ## Run training
-	@python main.py
+	@python train.py
 
 
 

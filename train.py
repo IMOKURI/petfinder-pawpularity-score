@@ -27,12 +27,12 @@ def main(c):
     mlflow.set_experiment(c.mlflow.experiment)
 
     with mlflow.start_run():
+        utils.log_commit_hash()
         utils.log_params_from_omegaconf_dict("params", c.params)
 
         mlflow.pytorch.log_model(model, c.params.model_name)
         log.info("Done.")
         mlflow.log_artifacts(".")
-
 
 
 if __name__ == "__main__":
