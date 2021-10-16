@@ -4,7 +4,7 @@
 NOW = $(shell date '+%Y%m%d-%H%M%S')
 
 train: ## Run training
-	@python train.py
+	@nohup python train.py &> ./outputs/nohup_$(NOW).log &
 
 
 debug_train: ## Run training with debug
