@@ -1,9 +1,8 @@
+import albumentations as A
 import cv2
 import torch
-import albumentations as A
 from albumentations.pytorch import ToTensorV2
-
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
 
 
 def make_dataset(c, df, transform=None, label=True):
@@ -13,6 +12,18 @@ def make_dataset(c, df, transform=None, label=True):
         ds = BaseDataset(c, df, get_transforms(c, transform), label)
 
     return ds
+
+
+def make_dataloader(c, ds, shuffle, drop_last):
+    dataloader = DataLoader(
+        ds,
+        batch_size=c.params.batch_size,
+        shuffle=shuffle,
+        num_workers=4,
+        pin_memory=True,
+        drop_last=drop_last,
+    )
+    return dataloader
 
 
 class BaseDataset(Dataset):
@@ -56,11 +67,22 @@ def get_transforms(c, data):
                 # A.Transpose(p=0.5),
                 A.HorizontalFlip(p=0.5),
                 # A.VerticalFlip(p=0.5),
-                A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=10, border_mode=0, p=0.5),
+                A.ShiftScaleRotate(
+                    shift_limit=0.2,
+                    scale_limit=0.2,
+                    rotate_limit=10,
+                    border_mode=0,
+                    p=0.5,
+                ),
                 # A.HueSaturationValue(hue_shift_limit=0.2, sat_shift_limit=0.2, val_shift_limit=0.2, p=0.5),
                 # A.RandomBrightnessContrast(brightness_limit=(-0.1, 0.1), contrast_limit=(-0.1, 0.1), p=0.5),
                 # A.CoarseDropout(p=0.5),
-                A.Cutout(max_h_size=int(c.params.size * 0.4), max_w_size=int(c.params.size * 0.4), num_holes=1, p=0.5),
+                A.Cutout(
+                    max_h_size=int(c.params.size * 0.4),
+                    max_w_size=int(c.params.size * 0.4),
+                    num_holes=1,
+                    p=0.5,
+                ),
                 A.Normalize(
                     mean=[0.485, 0.456, 0.406],
                     std=[0.229, 0.224, 0.225],

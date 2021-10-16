@@ -85,7 +85,7 @@ class EarlyStopping:
         self.counter = 0
         self.best_score = None
         self.early_stop = False
-        self.val_loss_min = np.Inf
+        self.best_loss = np.Inf
         self.delta = delta
         self.path = path
         self.trace_func = trace_func
@@ -97,7 +97,7 @@ class EarlyStopping:
             self.best_score = score
             self.best_preds = preds
             self.save_checkpoint(val_loss, model)
-        elif val_loss >= self.val_loss_min + self.delta:
+        elif val_loss >= self.best_loss + self.delta:
             if self.patience <= 0:
                 return
             self.counter += 1
@@ -116,10 +116,11 @@ class EarlyStopping:
         """Saves model when validation loss decrease."""
         if self.verbose:
             self.trace_func(
-                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
+                f"Validation loss decreased ({self.best_loss:.6f} --> {val_loss:.6f}).  Saving model ..."
             )
-        torch.save(model.state_dict(), self.path)
-        self.val_loss_min = val_loss
+        # torch.save(model.state_dict(), self.path)
+        mlflow.pytorch.log_model(model, self.path)
+        self.best_loss = val_loss
 
 
 def compute_grad_norm(parameters, norm_type=2.0):

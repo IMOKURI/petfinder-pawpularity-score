@@ -4,14 +4,12 @@ import os
 import hydra
 import mlflow
 import pandas as pd
-import timm
 import torch
 
 import src.utils as utils
 from src.get_score import get_result, get_score
-from src.make_dataset import make_dataset
 from src.make_fold import make_fold
-from src.make_model import make_model
+from src.train_fold import train_fold
 
 log = logging.getLogger(__name__)
 
@@ -36,20 +34,28 @@ def main(c):
 
     train = make_fold(c, train)
 
-    train_ds = make_dataset(c, train, "train")
-    test_ds = make_dataset(c, train, "valid", label=False)
-    model = make_model(c)
-
+    ###################################################################################################################
+    # Train
+    ###################################################################################################################
     mlflow.set_tracking_uri(c.mlflow.tracking_uri)
     mlflow.set_experiment(c.mlflow.experiment)
 
-    with mlflow.start_run():
-        utils.log_commit_hash()
-        utils.log_params_from_omegaconf_dict("", c.params)
+    mlflow.start_run()
+    utils.log_commit_hash()
+    utils.log_params_from_omegaconf_dict("", c.params)
 
-        mlflow.pytorch.log_model(model, c.params.model_name)
-        log.info("Done.")
-        mlflow.log_artifacts(".")
+    oof_df = pd.DataFrame()
+    for fold in range(c.params.n_fold):
+        utils.seed_torch(seed + fold)
+
+        # train_loop
+
+
+
+
+    log.info("Done.")
+    mlflow.log_artifacts(".")
+    mlflow.end_run()
 
 
 if __name__ == "__main__":
