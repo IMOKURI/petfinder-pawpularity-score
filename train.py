@@ -1,9 +1,11 @@
+import json
 import logging
 import os
 
 import hydra
 import mlflow
 import pandas as pd
+import requests
 import torch
 
 import src.utils as utils
@@ -59,11 +61,13 @@ def main(c):
             break
 
     log.info(f"========== final result ==========")
-    get_result(oof_df, c.params.n_fold)
+    score = get_result(oof_df, c.params.n_fold)
 
     log.info("Done.")
     mlflow.log_artifacts(".")
     mlflow.end_run()
+
+    return score
 
 
 if __name__ == "__main__":
