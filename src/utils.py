@@ -67,9 +67,7 @@ def timeSince(since, percent):
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
 
-    def __init__(
-        self, patience=7, verbose=False, delta=0, path="checkpoint.pt"
-    ):
+    def __init__(self, patience=7, verbose=False, delta=0, path="checkpoint.pt"):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -101,9 +99,7 @@ class EarlyStopping:
             if self.patience <= 0:
                 return
             self.counter += 1
-            log.info(
-                f"EarlyStopping counter: {self.counter} out of {self.patience}"
-            )
+            log.info(f"EarlyStopping counter: {self.counter} out of {self.patience}")
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
@@ -119,7 +115,11 @@ class EarlyStopping:
                 f"Validation loss decreased ({self.best_loss:.6f} --> {val_loss:.6f}).  Saving model ..."
             )
         # torch.save(model.state_dict(), f"{self.path}.pth")
-        mlflow.pytorch.log_model(model, self.path)
+        mlflow.pytorch.log_model(
+            model,
+            self.path,
+            pip_requirements=["torch==1.9.1+cu111", "torchvision==0.10.1+cu111"],
+        )
         self.best_loss = val_loss
 
 
