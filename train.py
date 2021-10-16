@@ -8,6 +8,7 @@ import timm
 import torch
 
 import src.utils as utils
+from src.get_score import get_result, get_score
 from src.make_dataset import make_dataset
 from src.make_fold import make_fold
 from src.make_model import make_model
