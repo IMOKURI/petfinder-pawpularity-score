@@ -5,12 +5,12 @@ import mlflow
 import numpy as np
 import torch.cuda.amp as amp
 
-from get_score import get_score
-from make_dataset import make_dataloader, make_dataset
-from make_loss import make_criterion, make_optimizer, make_scheduler
-from make_model import make_model
-from train_epoch import train_epoch, validate_epoch
-from utils import EarlyStopping
+from .get_score import get_score
+from .make_dataset import make_dataloader, make_dataset
+from .make_loss import make_criterion, make_optimizer, make_scheduler
+from .make_model import make_model
+from .train_epoch import train_epoch, validate_epoch
+from .utils import EarlyStopping
 
 log = logging.getLogger("__main__").getChild("train_loop")
 

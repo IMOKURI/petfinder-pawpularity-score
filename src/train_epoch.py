@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.cuda.amp as amp
 
-from utils import AverageMeter, compute_grad_norm, timeSince
+from .utils import AverageMeter, compute_grad_norm, timeSince
 
 log = logging.getLogger("__main__").getChild("train_epoch")
 
@@ -40,7 +40,7 @@ def train_epoch(
         if (step + 1) % c.params.gradient_acc_step == 0:
             scaler.unscale_(optimizer)
             grad_norm = torch.nn.utils.clip_grad_norm_(
-                model.parameters(), c.params.max_grad_norm
+                model.parameters(), c.params.max_grad_norm, error_if_nonfinite=False
             )
 
             scaler.step(optimizer)
