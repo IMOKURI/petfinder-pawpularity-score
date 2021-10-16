@@ -1,6 +1,7 @@
 import logging
 import math
 import os
+import pkg_resources as pr
 import random
 import time
 
@@ -63,6 +64,13 @@ def timeSince(since, percent):
     return "%s (remain %s)" % (asMinutes(s), asMinutes(rs))
 
 
+def get_torch_version():
+    packages = [str(p).replace(" ", "==") for p in pr.working_set]
+    check = ["torch==", "torchvision=="]
+    versions = [p for p in packages if any(c in p for c in check)]
+    return versions
+
+
 # https://github.com/Bjarten/early-stopping-pytorch
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
@@ -118,7 +126,7 @@ class EarlyStopping:
         mlflow.pytorch.log_model(
             model,
             self.path,
-            pip_requirements=["torch==1.9.1+cu111", "torchvision==0.10.1+cu111"],
+            pip_requirements=get_torch_version(),
         )
         self.best_loss = val_loss
 
