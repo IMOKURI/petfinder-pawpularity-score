@@ -4,6 +4,7 @@ wandb
 oof_df.csv
 validation_df.csv
 train.log
+nohup.out
 *.pth
 *.pkl
 *.json
