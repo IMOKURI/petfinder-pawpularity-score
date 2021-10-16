@@ -1,5 +1,6 @@
 import logging
 import time
+import warnings
 
 import numpy as np
 import torch
@@ -39,9 +40,14 @@ def train_epoch(
 
         if (step + 1) % c.params.gradient_acc_step == 0:
             scaler.unscale_(optimizer)
-            grad_norm = torch.nn.utils.clip_grad_norm_(
-                model.parameters(), c.params.max_grad_norm, error_if_nonfinite=False
-            )
+
+            # error_if_nonfinite に関する warning を抑止する
+            # pytorch==1.10 で不要となりそう
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", FutureWarning)
+                grad_norm = torch.nn.utils.clip_grad_norm_(
+                    model.parameters(), c.params.max_grad_norm, error_if_nonfinite=False
+                )
 
             scaler.step(optimizer)
             scaler.update()

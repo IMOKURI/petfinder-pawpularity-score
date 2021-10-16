@@ -1,13 +1,13 @@
 import logging
 import math
 import os
-import pkg_resources as pr
 import random
 import time
 
 import git
 import mlflow
 import numpy as np
+import pkg_resources as pr
 import torch
 from omegaconf import DictConfig, ListConfig
 
@@ -137,11 +137,14 @@ def compute_grad_norm(parameters, norm_type=2.0):
         parameters = [parameters]
     parameters = [p for p in parameters if p.grad is not None]
     norm_type = float(norm_type)
-    total_norm = 0
-    for p in parameters:
-        param_norm = p.grad.data.norm(norm_type)
-        total_norm += param_norm.item() ** norm_type
-    total_norm = total_norm ** (1.0 / norm_type)
+    device = parameters[0].grad.device
+    total_norm = torch.norm(
+        torch.stack(
+            [torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]
+        ),
+        norm_type,
+    )
+
     return total_norm
 
 
