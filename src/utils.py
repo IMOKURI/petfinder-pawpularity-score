@@ -60,6 +60,82 @@ def timeSince(since, percent):
     return "%s (remain %s)" % (asMinutes(s), asMinutes(rs))
 
 
+# https://github.com/Bjarten/early-stopping-pytorch
+class EarlyStopping:
+    """Early stops the training if validation loss doesn't improve after a given patience."""
+
+    def __init__(
+        self, patience=7, verbose=False, delta=0, path="checkpoint.pt", trace_func=print
+    ):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                            Default: 7
+            verbose (bool): If True, prints a message for each validation loss improvement.
+                            Default: False
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: 0
+            path (str): Path for the checkpoint to be saved to.
+                            Default: 'checkpoint.pt'
+            trace_func (function): trace print function.
+                            Default: print
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_loss_min = np.Inf
+        self.delta = delta
+        self.path = path
+        self.trace_func = trace_func
+        self.best_preds = None
+
+    def __call__(self, val_loss, score, model, preds):
+
+        if self.best_score is None:
+            self.best_score = score
+            self.best_preds = preds
+            self.save_checkpoint(val_loss, model)
+        elif val_loss >= self.val_loss_min + self.delta:
+            if self.patience <= 0:
+                return
+            self.counter += 1
+            self.trace_func(
+                f"EarlyStopping counter: {self.counter} out of {self.patience}"
+            )
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.best_preds = preds
+            self.save_checkpoint(val_loss, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_loss, model):
+        """Saves model when validation loss decrease."""
+        if self.verbose:
+            self.trace_func(
+                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
+            )
+        torch.save(model.state_dict(), self.path)
+        self.val_loss_min = val_loss
+
+
+def compute_grad_norm(parameters, norm_type=2.0):
+    """Refer to torch.nn.utils.clip_grad_norm_"""
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+    parameters = [p for p in parameters if p.grad is not None]
+    norm_type = float(norm_type)
+    total_norm = 0
+    for p in parameters:
+        param_norm = p.grad.data.norm(norm_type)
+        total_norm += param_norm.item() ** norm_type
+    total_norm = total_norm ** (1.0 / norm_type)
+    return total_norm
+
+
 def log_params_from_omegaconf_dict(parent_name, element):
     if isinstance(element, DictConfig):
         for k, v in element.items():
