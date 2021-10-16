@@ -8,7 +8,9 @@ import timm
 import torch
 
 import src.utils as utils
+from src.make_dataset import make_dataset
 from src.make_fold import make_fold
+from src.make_model import make_model
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +35,9 @@ def main(c):
 
     train = make_fold(c, train)
 
-    model = timm.create_model(c.params.model_name, pretrained=False)
+    train_ds = make_dataset(c, train, "train")
+    test_ds = make_dataset(c, train, "valid", label=False)
+    model = make_model(c)
 
     mlflow.set_tracking_uri(c.mlflow.tracking_uri)
     mlflow.set_experiment(c.mlflow.experiment)

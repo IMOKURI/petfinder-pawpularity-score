@@ -1,3 +1,4 @@
+# dataset_type: base
+# model_type: base
 model_name: resnet18
-# dataset: base
 size: 384

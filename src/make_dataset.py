@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 
 
 def make_dataset(c, df, transform=None, label=True):
-    if False:  # c.params.dataset == "xxx":
+    if False:  # c.params.dataset_type == "xxx":
         pass
     else:
         ds = BaseDataset(c, df, get_transforms(c, transform), label)
