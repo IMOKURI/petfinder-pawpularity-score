@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 import random
@@ -8,6 +9,8 @@ import mlflow
 import numpy as np
 import torch
 from omegaconf import DictConfig, ListConfig
+
+log = logging.getLogger("__main__").getChild("utils")
 
 
 def seed_torch(seed=42):
@@ -65,7 +68,7 @@ class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
 
     def __init__(
-        self, patience=7, verbose=False, delta=0, path="checkpoint.pt", trace_func=print
+        self, patience=7, verbose=False, delta=0, path="checkpoint.pt"
     ):
         """
         Args:
@@ -77,8 +80,6 @@ class EarlyStopping:
                             Default: 0
             path (str): Path for the checkpoint to be saved to.
                             Default: 'checkpoint.pt'
-            trace_func (function): trace print function.
-                            Default: print
         """
         self.patience = patience
         self.verbose = verbose
@@ -88,7 +89,6 @@ class EarlyStopping:
         self.best_loss = np.Inf
         self.delta = delta
         self.path = path
-        self.trace_func = trace_func
         self.best_preds = None
 
     def __call__(self, val_loss, score, model, preds):
@@ -101,7 +101,7 @@ class EarlyStopping:
             if self.patience <= 0:
                 return
             self.counter += 1
-            self.trace_func(
+            log.info(
                 f"EarlyStopping counter: {self.counter} out of {self.patience}"
             )
             if self.counter >= self.patience:
@@ -115,10 +115,10 @@ class EarlyStopping:
     def save_checkpoint(self, val_loss, model):
         """Saves model when validation loss decrease."""
         if self.verbose:
-            self.trace_func(
+            log.info(
                 f"Validation loss decreased ({self.best_loss:.6f} --> {val_loss:.6f}).  Saving model ..."
             )
-        # torch.save(model.state_dict(), self.path)
+        # torch.save(model.state_dict(), f"{self.path}.pth")
         mlflow.pytorch.log_model(model, self.path)
         self.best_loss = val_loss
 

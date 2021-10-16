@@ -85,7 +85,7 @@ def train_fold(c, df, fold, device):
             f"Epoch {epoch+1} - "
             f"loss_train: {avg_loss:.4f} "
             f"loss_val: {avg_val_loss:.4f} "
-            f"score: {score} "
+            f"score: {score:.4f} "
             f"time: {elapsed:.0f}s"
         )
         mlflow.log_metrics(

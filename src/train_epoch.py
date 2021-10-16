@@ -58,7 +58,8 @@ def train_epoch(
                 f"Elapsed {timeSince(start, float(step + 1) / len(train_loader)):s} "
                 f"Loss: {losses.avg:.4f} "
                 f"Grad: {grad_norm:.4f} "
-                f"LR: {scheduler.get_lr()[0]:.2e}  "
+                f"LR: {scheduler.get_last_lr()[0]:.2e}  "
+                # f"LR: {scheduler.get_lr()[0]:.2e}  "
             )
 
     return losses.avg

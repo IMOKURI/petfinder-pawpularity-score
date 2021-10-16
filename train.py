@@ -55,6 +55,9 @@ def main(c):
         log.info(f"========== fold {fold} result ==========")
         get_result(_oof_df, fold)
 
+        if c.settings.debug:
+            break
+
     log.info(f"========== final result ==========")
     get_result(oof_df, c.params.n_fold)
 
