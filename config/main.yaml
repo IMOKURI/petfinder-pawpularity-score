@@ -30,7 +30,7 @@ settings:
     # - validate
     # - inference
 
-  debug: True
+  debug: False
   n_debug_data: 1000
 
   amp: True
