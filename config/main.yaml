@@ -11,7 +11,7 @@ hydra:
 
 mlflow:
   tracking_uri: http://127.0.0.1:5000
-  experiment: sugi-demo-2
+  experiment: sugi-petfinder2
 
 settings:
   print_freq: 100
