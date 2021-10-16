@@ -15,7 +15,7 @@ from utils import EarlyStopping
 log = logging.getLogger("__main__").getChild("train_loop")
 
 
-def train_loop(c, df, fold, device):
+def train_fold(c, df, fold, device):
     # ====================================================
     # Data Loader
     # ====================================================
