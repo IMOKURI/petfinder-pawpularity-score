@@ -15,7 +15,7 @@ mlflow:
 
 settings:
   print_freq: 100
-  gpus: "1,2,3,4,5,6,7"
+  gpus: "1,2"
 
   dirs:
     input: ${hydra:runtime.cwd}/../input/petfinder-pawpularity-score/
