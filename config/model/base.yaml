@@ -1,4 +1,4 @@
 # dataset_type: base
 # model_type: base
-model_name: resnet18
-size: 384
+model_name: swin_base_patch4_window7_224_in22k
+size: 224

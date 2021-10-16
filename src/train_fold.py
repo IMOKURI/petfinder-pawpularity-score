@@ -1,6 +1,7 @@
 import logging
 import time
 
+import mlflow
 import numpy as np
 import torch.cuda.amp as amp
 
@@ -82,10 +83,18 @@ def train_loop(c, df, fold, device):
         elapsed = time.time() - start_time
         log.info(
             f"Epoch {epoch+1} - "
-            f"train_loss: {avg_loss:.4f} "
-            f"val_loss: {avg_val_loss:.4f} "
+            f"loss_train: {avg_loss:.4f} "
+            f"loss_val: {avg_val_loss:.4f} "
             f"score: {score} "
             f"time: {elapsed:.0f}s"
+        )
+        mlflow.log_metrics(
+            {
+                f"loss_train_{fold}": avg_loss,
+                f"loss_val_{fold}": avg_val_loss,
+                f"score_{fold}": score,
+            },
+            step=epoch,
         )
 
         es(avg_val_loss, score, model, preds)

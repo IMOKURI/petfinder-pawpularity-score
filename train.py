@@ -46,12 +46,17 @@ def main(c):
 
     oof_df = pd.DataFrame()
     for fold in range(c.params.n_fold):
-        utils.seed_torch(seed + fold)
+        log.info(f"========== fold {fold} training ==========")
+        utils.seed_torch(c.params.seed + fold)
 
-        # train_loop
+        _oof_df, score, loss = train_fold(c, train, fold, device)
+        oof_df = pd.concat([oof_df, _oof_df])
 
+        log.info(f"========== fold {fold} result ==========")
+        get_result(_oof_df, fold)
 
-
+    log.info(f"========== final result ==========")
+    get_result(oof_df, c.params.n_fold)
 
     log.info("Done.")
     mlflow.log_artifacts(".")
