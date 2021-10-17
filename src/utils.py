@@ -30,6 +30,8 @@ def seed_torch(seed=42):
 
 def debug_settings(c):
     if c.settings.debug:
+        c.mlflow.enabled = False
+        c.wandb.enabled = False
         c.settings.print_freq = 10
         c.params.n_fold = 3
         c.params.epoch = 1

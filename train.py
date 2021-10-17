@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 
 import src.utils as utils
+from src.load_data import load_data
 from src.get_score import get_result
 from src.make_fold import make_fold
 from src.train_fold import train_fold
@@ -24,20 +25,11 @@ def main(c):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.backends.cudnn.benchmark = True
 
-    ###################################################################################################################
-    # Load data
-    ###################################################################################################################
-    train = pd.read_csv(os.path.join(c.settings.dirs.input, "train.csv"))
-    test = pd.read_csv(os.path.join(c.settings.dirs.input, "test.csv"))
-    sub = pd.read_csv(os.path.join(c.settings.dirs.input, "sample_submission.csv"))
-
-    train = make_fold(c, train)
-
-    ###################################################################################################################
-    # Train
-    ###################################################################################################################
     utils.setup_mlflow(c)
     run = utils.setup_wandb(c)
+
+    train, test, sub = load_data(c)
+    train = make_fold(c, train)
 
     oof_df = pd.DataFrame()
     for fold in range(c.params.n_fold):
@@ -63,8 +55,6 @@ def main(c):
 
     utils.teardown_mlflow(c)
     utils.teardown_wandb(c, run)
-
-    return score
 
 
 if __name__ == "__main__":
