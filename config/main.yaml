@@ -10,9 +10,15 @@ hydra:
         format: '[%(levelname)s][%(name)s] - %(message)s'
 
 mlflow:
-  enabled: False
+  enabled: True
   tracking_uri: http://127.0.0.1:5000
   experiment: sugi-petfinder2
+
+wandb:
+  enabled: True
+  entity: imokuri
+  project: petfinder2
+  dir: ${hydra:runtime.cwd}/wandb
 
 settings:
   print_freq: 100

@@ -11,7 +11,9 @@ import numpy as np
 import pkg_resources as pr
 import requests
 import torch
-from omegaconf import DictConfig, ListConfig
+from omegaconf import DictConfig, ListConfig, OmegaConf
+
+import wandb
 
 log = logging.getLogger("__main__").getChild("utils")
 
@@ -77,7 +79,9 @@ def get_torch_version():
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
 
-    def __init__(self, patience=7, verbose=False, delta=0, path="checkpoint.pt", mlflow=False):
+    def __init__(
+        self, patience=7, verbose=False, delta=0, path="checkpoint.pt", mlflow=False
+    ):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -125,14 +129,13 @@ class EarlyStopping:
             log.info(
                 f"Validation loss decreased ({self.best_loss:.6f} --> {val_loss:.6f}).  Saving model ..."
             )
-        if self.mlflow:
-            mlflow.pytorch.log_model(
-                model,
-                self.path,
-                pip_requirements=get_torch_version(),
-            )
-        else:
-            torch.save(model.state_dict(), f"{self.path}.pth")
+        # if self.mlflow:
+        #     mlflow.pytorch.log_model(
+        #         model,
+        #         self.path,
+        #         pip_requirements=get_torch_version(),
+        #     )
+        torch.save(model.state_dict(), f"{self.path}_best.pth")
         self.best_loss = val_loss
 
 
@@ -151,6 +154,42 @@ def compute_grad_norm(parameters, norm_type=2.0):
     )
 
     return total_norm
+
+
+def setup_mlflow(c):
+    if c.mlflow.enabled:
+        mlflow.set_tracking_uri(c.mlflow.tracking_uri)
+        mlflow.set_experiment(c.mlflow.experiment)
+
+        mlflow.start_run()
+        log_commit_hash()
+        log_params_from_omegaconf_dict("", c.params)
+
+
+def setup_wandb(c):
+    if c.wandb.enabled:
+        c_dict = OmegaConf.to_container(c.params, resolve=True)
+        run = wandb.init(
+            entity=c.wandb.entity,
+            project=c.wandb.project,
+            dir=c.wandb.dir,
+            config=c_dict,
+            job_type=c.settings.job_type[0],
+        )
+        return run
+
+
+def teardown_mlflow(c):
+    if c.mlflow.enabled:
+        mlflow.log_artifacts(".")
+        mlflow.end_run()
+
+
+def teardown_wandb(c, run):
+    if c.wandb.enabled:
+        artifact = wandb.Artifact(c.params.model_name, type="model")
+        artifact.add_dir(".")
+        run.log_artifact(artifact)
 
 
 def log_params_from_omegaconf_dict(parent_name, element):

@@ -5,6 +5,8 @@ import mlflow
 import numpy as np
 import torch.cuda.amp as amp
 
+import wandb
+
 from .get_score import get_score
 from .make_dataset import make_dataloader, make_dataset
 from .make_loss import make_criterion, make_optimizer, make_scheduler
@@ -97,6 +99,15 @@ def train_fold(c, df, fold, device):
                     f"score_{fold}": score,
                 },
                 step=epoch,
+            )
+        if c.wandb.enabled:
+            wandb.log(
+                {
+                    "epoch": epoch + 1,
+                    f"loss/train_fold{fold}": avg_loss,
+                    f"loss/valid_fold{fold}": avg_val_loss,
+                    f"score/fold{fold}": score,
+                }
             )
 
         es(avg_val_loss, score, model, preds)

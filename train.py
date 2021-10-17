@@ -2,7 +2,6 @@ import logging
 import os
 
 import hydra
-import mlflow
 import pandas as pd
 import torch
 
@@ -37,13 +36,8 @@ def main(c):
     ###################################################################################################################
     # Train
     ###################################################################################################################
-    if c.mlflow.enabled:
-        mlflow.set_tracking_uri(c.mlflow.tracking_uri)
-        mlflow.set_experiment(c.mlflow.experiment)
-
-        mlflow.start_run()
-        utils.log_commit_hash()
-        utils.log_params_from_omegaconf_dict("", c.params)
+    utils.setup_mlflow(c)
+    run = utils.setup_wandb(c)
 
     oof_df = pd.DataFrame()
     for fold in range(c.params.n_fold):
@@ -54,22 +48,21 @@ def main(c):
         oof_df = pd.concat([oof_df, _oof_df])
 
         log.info(f"========== fold {fold} result ==========")
-        get_result(_oof_df, fold)
+        get_result(c, _oof_df, fold)
 
         if c.settings.debug:
             break
 
     log.info(f"========== final result ==========")
-    score = get_result(oof_df, c.params.n_fold)
+    score = get_result(c, oof_df, c.params.n_fold)
     utils.send_result_to_slack(c, score)
 
     oof_df.to_csv("oof_df.csv", index=False)
 
     log.info("Done.")
 
-    if c.mlflow.enabled:
-        mlflow.log_artifacts(".")
-        mlflow.end_run()
+    utils.teardown_mlflow(c)
+    utils.teardown_wandb(c, run)
 
     return score
 
