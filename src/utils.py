@@ -1,3 +1,4 @@
+import json
 import logging
 import math
 import os
@@ -8,6 +9,7 @@ import git
 import mlflow
 import numpy as np
 import pkg_resources as pr
+import requests
 import torch
 from omegaconf import DictConfig, ListConfig
 
@@ -75,7 +77,7 @@ def get_torch_version():
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
 
-    def __init__(self, patience=7, verbose=False, delta=0, path="checkpoint.pt"):
+    def __init__(self, patience=7, verbose=False, delta=0, path="checkpoint.pt", mlflow=False):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -96,6 +98,7 @@ class EarlyStopping:
         self.delta = delta
         self.path = path
         self.best_preds = None
+        self.mlflow = mlflow
 
     def __call__(self, val_loss, score, model, preds):
 
@@ -122,12 +125,14 @@ class EarlyStopping:
             log.info(
                 f"Validation loss decreased ({self.best_loss:.6f} --> {val_loss:.6f}).  Saving model ..."
             )
-        # torch.save(model.state_dict(), f"{self.path}.pth")
-        mlflow.pytorch.log_model(
-            model,
-            self.path,
-            pip_requirements=get_torch_version(),
-        )
+        if self.mlflow:
+            mlflow.pytorch.log_model(
+                model,
+                self.path,
+                pip_requirements=get_torch_version(),
+            )
+        else:
+            torch.save(model.state_dict(), f"{self.path}.pth")
         self.best_loss = val_loss
 
 
@@ -166,3 +171,12 @@ def log_commit_hash():
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
     mlflow.set_tag("mlflow.source.git.commit", sha)
+
+
+def send_result_to_slack(c, score):
+    webhook_url = os.environ.get("SLACK_WEBHOOK_URL", "")
+    msg = f"score: {score:.5f}, model: {c.params.model_name}"
+    try:
+        requests.post(webhook_url, data=json.dumps({"text": msg}))
+    except Exception:
+        log.warning(f"Failed to send message to slack.")

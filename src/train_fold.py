@@ -46,6 +46,7 @@ def train_fold(c, df, fold, device):
         patience=c.params.es_patience,
         verbose=True,
         path=f"{c.params.model_name.replace('/', '-')}_fold{fold}",
+        mlflow=c.mlflow.enabled,
     )
 
     # ====================================================
@@ -88,14 +89,15 @@ def train_fold(c, df, fold, device):
             f"score: {score:.4f} "
             f"time: {elapsed:.0f}s"
         )
-        mlflow.log_metrics(
-            {
-                f"loss_train_{fold}": avg_loss,
-                f"loss_val_{fold}": avg_val_loss,
-                f"score_{fold}": score,
-            },
-            step=epoch,
-        )
+        if c.mlflow.enabled:
+            mlflow.log_metrics(
+                {
+                    f"loss_train_{fold}": avg_loss,
+                    f"loss_val_{fold}": avg_val_loss,
+                    f"score_{fold}": score,
+                },
+                step=epoch,
+            )
 
         es(avg_val_loss, score, model, preds)
 

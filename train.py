@@ -1,11 +1,9 @@
-import json
 import logging
 import os
 
 import hydra
 import mlflow
 import pandas as pd
-import requests
 import torch
 
 import src.utils as utils
@@ -39,12 +37,13 @@ def main(c):
     ###################################################################################################################
     # Train
     ###################################################################################################################
-    mlflow.set_tracking_uri(c.mlflow.tracking_uri)
-    mlflow.set_experiment(c.mlflow.experiment)
+    if c.mlflow.enabled:
+        mlflow.set_tracking_uri(c.mlflow.tracking_uri)
+        mlflow.set_experiment(c.mlflow.experiment)
 
-    mlflow.start_run()
-    utils.log_commit_hash()
-    utils.log_params_from_omegaconf_dict("", c.params)
+        mlflow.start_run()
+        utils.log_commit_hash()
+        utils.log_params_from_omegaconf_dict("", c.params)
 
     oof_df = pd.DataFrame()
     for fold in range(c.params.n_fold):
@@ -62,10 +61,15 @@ def main(c):
 
     log.info(f"========== final result ==========")
     score = get_result(oof_df, c.params.n_fold)
+    utils.send_result_to_slack(c, score)
+
+    oof_df.to_csv("oof_df.csv", index=False)
 
     log.info("Done.")
-    mlflow.log_artifacts(".")
-    mlflow.end_run()
+
+    if c.mlflow.enabled:
+        mlflow.log_artifacts(".")
+        mlflow.end_run()
 
     return score
 
