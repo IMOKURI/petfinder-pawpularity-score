@@ -165,7 +165,7 @@ def setup_mlflow(c):
 
         mlflow.start_run()
         mlflow.set_tag("mlflow.source.git.commit", get_commit_hash())
-        # log_params_from_omegaconf_dict("", c.params)
+        log_params_from_omegaconf_dict("", c.params)
 
 
 def setup_wandb(c):
@@ -192,9 +192,9 @@ def teardown_mlflow(c, loss):
 def teardown_wandb(c, run, loss):
     if c.wandb.enabled:
         wandb.summary["loss"] = loss
-        # artifact = wandb.Artifact(c.params.model_name, type="model")
-        # artifact.add_dir(".")
-        # run.log_artifact(artifact)
+        artifact = wandb.Artifact(c.params.model_name, type="model")
+        artifact.add_dir(".")
+        run.log_artifact(artifact)
 
 
 def log_params_from_omegaconf_dict(parent_name, element):
