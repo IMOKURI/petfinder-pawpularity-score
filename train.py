@@ -1,5 +1,6 @@
 import logging
 import os
+import statistics
 
 import hydra
 import pandas as pd
@@ -32,12 +33,14 @@ def main(c):
     train = make_fold(c, train)
 
     oof_df = pd.DataFrame()
+    losses = []
     for fold in range(c.params.n_fold):
         log.info(f"========== fold {fold} training ==========")
         utils.seed_torch(c.params.seed + fold)
 
         _oof_df, score, loss = train_fold(c, train, fold, device)
         oof_df = pd.concat([oof_df, _oof_df])
+        losses.append(loss)
 
         log.info(f"========== fold {fold} result ==========")
         get_result(c, _oof_df, fold)
@@ -45,16 +48,17 @@ def main(c):
         if c.settings.debug:
             break
 
+    oof_df.to_csv("oof_df.csv", index=False)
+    loss = statistics.mean(losses)
+
     log.info(f"========== final result ==========")
     score = get_result(c, oof_df, c.params.n_fold)
-    utils.send_result_to_slack(c, score)
-
-    oof_df.to_csv("oof_df.csv", index=False)
+    utils.send_result_to_slack(c, score, loss)
 
     log.info("Done.")
 
-    utils.teardown_mlflow(c)
-    utils.teardown_wandb(c, run)
+    utils.teardown_mlflow(c, loss)
+    utils.teardown_wandb(c, run, loss)
 
 
 if __name__ == "__main__":

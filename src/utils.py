@@ -181,14 +181,16 @@ def setup_wandb(c):
         return run
 
 
-def teardown_mlflow(c):
+def teardown_mlflow(c, loss):
     if c.mlflow.enabled:
+        mlflow.log_metric("loss", loss)
         mlflow.log_artifacts(".")
         mlflow.end_run()
 
 
-def teardown_wandb(c, run):
+def teardown_wandb(c, run, loss):
     if c.wandb.enabled:
+        wandb.summary["loss"] = loss
         artifact = wandb.Artifact(c.params.model_name, type="model")
         artifact.add_dir(".")
         run.log_artifact(artifact)
@@ -214,9 +216,9 @@ def log_commit_hash():
     mlflow.set_tag("mlflow.source.git.commit", sha)
 
 
-def send_result_to_slack(c, score):
+def send_result_to_slack(c, score, loss):
     webhook_url = os.environ.get("SLACK_WEBHOOK_URL", "")
-    msg = f"score: {score:.5f}, model: {c.params.model_name}"
+    msg = f"score: {score:.5f}, loss: {loss:.5f}, model: {c.params.model_name}"
     try:
         requests.post(webhook_url, data=json.dumps({"text": msg}))
     except Exception:
