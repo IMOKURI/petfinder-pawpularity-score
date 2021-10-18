@@ -164,13 +164,14 @@ def setup_mlflow(c):
         mlflow.set_experiment(c.mlflow.experiment)
 
         mlflow.start_run()
-        log_commit_hash()
-        log_params_from_omegaconf_dict("", c.params)
+        mlflow.set_tag("mlflow.source.git.commit", get_commit_hash())
+        # log_params_from_omegaconf_dict("", c.params)
 
 
 def setup_wandb(c):
     if c.wandb.enabled:
         c_dict = OmegaConf.to_container(c.params, resolve=True)
+        c_dict["commit"] = get_commit_hash()
         run = wandb.init(
             entity=c.wandb.entity,
             project=c.wandb.project,
@@ -191,9 +192,9 @@ def teardown_mlflow(c, loss):
 def teardown_wandb(c, run, loss):
     if c.wandb.enabled:
         wandb.summary["loss"] = loss
-        artifact = wandb.Artifact(c.params.model_name, type="model")
-        artifact.add_dir(".")
-        run.log_artifact(artifact)
+        # artifact = wandb.Artifact(c.params.model_name, type="model")
+        # artifact.add_dir(".")
+        # run.log_artifact(artifact)
 
 
 def log_params_from_omegaconf_dict(parent_name, element):
@@ -210,10 +211,10 @@ def log_params_from_omegaconf_dict(parent_name, element):
             mlflow.log_param(f"{parent_name}.{i}", v)
 
 
-def log_commit_hash():
+def get_commit_hash():
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
-    mlflow.set_tag("mlflow.source.git.commit", sha)
+    return sha
 
 
 def send_result_to_slack(c, score, loss):
