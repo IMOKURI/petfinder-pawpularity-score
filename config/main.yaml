@@ -10,7 +10,7 @@ hydra:
         format: '[%(levelname)s][%(name)s] - %(message)s'
 
 mlflow:
-  enabled: True
+  enabled: False
   tracking_uri: http://127.0.0.1:5000
   experiment: sugi-petfinder2
 
