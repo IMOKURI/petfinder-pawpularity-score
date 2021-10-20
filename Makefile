@@ -6,10 +6,11 @@ NOW = $(shell date '+%Y%m%d-%H%M%S')
 train: ## Run training
 	@nohup python train.py > /tmp/nohup_$(NOW).log &
 
+validate: ## Run validation
+	@python validate.py
 
 debug_train: ## Run training with debug
 	@python train.py settings.debug=True
-
 
 clean: ## Clean work directory
 	@rm -rf outputs
