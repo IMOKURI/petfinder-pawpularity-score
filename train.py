@@ -53,6 +53,7 @@ def main(c):
     utils.teardown_mlflow(c, losses.avg)
     utils.teardown_wandb(c, run, losses.avg)
 
+    return score
 
 if __name__ == "__main__":
     main()
