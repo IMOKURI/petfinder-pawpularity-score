@@ -10,10 +10,11 @@ validate: ## Run validation
 	@python validate.py
 
 debug_train: ## Run training with debug
-	@python train.py settings.debug=True
+	@python train.py settings.debug=True hydra.verbose=True
+
 
 clean: ## Clean work directory
-	@rm -rf outputs
+	@rm -rf ../outputs
 
 
 help: ## Show this help

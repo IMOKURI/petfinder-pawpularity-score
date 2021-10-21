@@ -12,6 +12,7 @@ import pkg_resources as pr
 import requests
 import torch
 from omegaconf import DictConfig, ListConfig, OmegaConf
+from omegaconf.errors import ConfigAttributeError
 
 import wandb
 
@@ -27,6 +28,8 @@ def seed_torch(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
 
+    torch.backends.cudnn.benchmark = True
+
 
 def debug_settings(c):
     if c.settings.debug:
@@ -35,6 +38,19 @@ def debug_settings(c):
         c.settings.print_freq = 10
         c.params.n_fold = 3
         c.params.epoch = 1
+
+
+def gpu_settings(c):
+    try:
+        if os.environ.get("CUDA_VISIBLE_DEVICES") is None:
+            os.environ["CUDA_VISIBLE_DEVICES"] = c.settings.gpus
+        log.info(f"CUDA_VISIBLE_DEVICES: {os.environ['CUDA_VISIBLE_DEVICES']}")
+    except ConfigAttributeError:
+        pass
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    log.info(f"torch device: {device}")
+    return device
 
 
 class AverageMeter(object):
@@ -164,14 +180,16 @@ def setup_mlflow(c):
         mlflow.set_experiment(c.mlflow.experiment)
 
         mlflow.start_run()
-        mlflow.set_tag("mlflow.source.git.commit", get_commit_hash())
+        mlflow.set_tag(
+            "mlflow.source.git.commit", get_commit_hash(c.settings.dirs.working)
+        )
         log_params_from_omegaconf_dict("", c.params)
 
 
 def setup_wandb(c):
     if c.wandb.enabled:
         c_dict = OmegaConf.to_container(c.params, resolve=True)
-        c_dict["commit"] = get_commit_hash()
+        c_dict["commit"] = get_commit_hash(c.settings.dirs.working)
         run = wandb.init(
             entity=c.wandb.entity,
             project=c.wandb.project,
@@ -211,8 +229,8 @@ def log_params_from_omegaconf_dict(parent_name, element):
             mlflow.log_param(f"{parent_name}.{i}", v)
 
 
-def get_commit_hash():
-    repo = git.Repo(search_parent_directories=True)
+def get_commit_hash(dir_):
+    repo = git.Repo(dir_, search_parent_directories=True)
     sha = repo.head.object.hexsha
     return sha
 

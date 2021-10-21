@@ -4,6 +4,8 @@ defaults:
   - _self_
 
 hydra:
+  run:
+    dir: ../outputs/${settings.job_type[0]}/${now:%Y-%m-%d_%H-%M-%S}
   job_logging:
     formatters:
       simple:
@@ -18,13 +20,11 @@ wandb:
   enabled: True
   entity: imokuri
   project: petfinder2-1
-  dir: ${hydra:runtime.cwd}/wandb
+  dir: ${hydra:runtime.cwd}/../cache/wandb
 
 settings:
   print_freq: 100
-  gpus: "2,3,4,5,6,7"
-  # gpus: "1,2,3,4"
-  # gpus: "5,6,7"
+  gpus: "4,5,6,7"
 
   dirs:
     working: ${hydra:runtime.cwd}
