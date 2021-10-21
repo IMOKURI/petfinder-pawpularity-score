@@ -63,3 +63,4 @@ validate:
     - dm_nfnet_f3-v0
     - dm_nfnet_f4-v0
     - dm_nfnet_f5-v0
+    - dm_nfnet_f6-v0
