@@ -18,37 +18,47 @@ hydra:
     study_name: train
     direction: minimize
     n_jobs: 1
-    n_trials: 20
+    n_trials: 10
     search_space:
-      params.lr:
+      params.model_params.attn_drop_rate:
         type: float
-        low: 1e-6
-        high: 1e-3
-        log: True
-      params.min_lr:
+        low: 0.0
+        high: 0.5
+        step: 0.1
+      params.model_params.drop_rate:
         type: float
-        low: 1e-7
-        high: 1e-5
-        log: True
-      params.weight_decay:
-        type: float
-        low: 1e-7
-        high: 1e-5
-        log: True
-      params.gradient_acc_step:
-        type: categorical
-        choices:
-          - 1
-          - 2
-          - 3
-          - 4
-      params.max_grad_norm:
-        type: categorical
-        choices:
-          - 0.1
-          - 1
-          - 10
-          - 1000
+        low: 0.0
+        high: 0.5
+        step: 0.1
+      # params.lr:
+      #   type: float
+      #   low: 1e-6
+      #   high: 1e-3
+      #   log: True
+      # params.min_lr:
+      #   type: float
+      #   low: 1e-7
+      #   high: 1e-5
+      #   log: True
+      # params.weight_decay:
+      #   type: float
+      #   low: 1e-7
+      #   high: 1e-5
+      #   log: True
+      # params.gradient_acc_step:
+      #   type: categorical
+      #   choices:
+      #     - 1
+      #     - 2
+      #     - 3
+      #     - 4
+      # params.max_grad_norm:
+      #   type: categorical
+      #   choices:
+      #     - 0.1
+      #     - 1
+      #     - 10
+      #     - 1000
 
 mlflow:
   enabled: False
@@ -90,9 +100,9 @@ settings:
 params:
   seed: 440
   n_fold: 10
-  epoch: 5
+  epoch: 10
   es_patience: 0
-  batch_size: 24
+  batch_size: 32
   gradient_acc_step: 1
   max_grad_norm: 1000
 
