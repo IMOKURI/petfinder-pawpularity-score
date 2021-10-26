@@ -74,7 +74,7 @@ def train_fold(c, df, fold, device):
         avg_val_loss, preds = validate_epoch(c, valid_loader, model, criterion, device)
         valid_labels = valid_folds["Pawpularity"].values
 
-        if c.params.criterion == "BCEWithLogitsLoss":
+        if "WithLogitsLoss" in c.params.criterion:
             preds = 1 / (1 + np.exp(-preds))
 
         preds *= 100.0

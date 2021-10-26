@@ -7,4 +7,4 @@ size: 384
 
 model_params:
   attn_drop_rate: 0.0
-  drop_rate: 0.1
+  drop_rate: 0.0
