@@ -67,6 +67,7 @@ mlflow:
 
 wandb:
   enabled: True
+  save_artifacts: False
   entity: imokuri
   project: petfinder2
   dir: ${hydra:runtime.cwd}/../cache
@@ -98,11 +99,11 @@ settings:
   n_class: 1
 
 params:
-  seed: 123 # 440
+  seed: 1231 # 440
   n_fold: 10
   epoch: 10
   es_patience: 0
-  batch_size: 32
+  batch_size: 8
   gradient_acc_step: 4
   max_grad_norm: 1000
 

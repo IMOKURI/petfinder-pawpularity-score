@@ -210,9 +210,10 @@ def teardown_mlflow(c, loss):
 def teardown_wandb(c, run, loss):
     if c.wandb.enabled:
         wandb.summary["loss"] = loss
-        artifact = wandb.Artifact(c.params.model_name, type="model")
-        artifact.add_dir(".")
-        run.log_artifact(artifact)
+        if c.wandb.save_artifacts:
+            artifact = wandb.Artifact(c.params.model_name, type="model")
+            artifact.add_dir(".")
+            run.log_artifact(artifact)
 
 
 def log_params_from_omegaconf_dict(parent_name, element):
